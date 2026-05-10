@@ -1,0 +1,68 @@
+{
+  "name": "ROS 2 Humble",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  // GPU passthrough for NVIDIA GPUs (Windows/Linux).
+  // Comment out if you're on Mac or have no NVIDIA GPU.
+  "runArgs": ["--gpus", "all"],
+  "workspaceFolder": "/workspace/tbot3_nav_monitor",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace/tbot3_nav_monitor,type=bind,consistency=cached",
+  "mounts": [
+    "source=tbot3-build,target=/workspace/tbot3_nav_monitor/build,type=volume",
+    "source=tbot3-install,target=/workspace/tbot3_nav_monitor/install,type=volume",
+    "source=tbot3-log,target=/workspace/tbot3_nav_monitor/log,type=volume"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "twxs.cmake",
+        "dotjoshjohnson.xml",
+        "redhat.vscode-yaml",
+        "streetsidesoftware.code-spell-checker"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/bin/python3",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": true,
+        "python.formatting.provider": "black",
+        "editor.formatOnSave": true,
+        "files.associations": {
+          "*.launch": "xml"
+        }
+      }
+    }
+  },
+  "forwardPorts": [6080, 5901],
+  "portsAttributes": {
+    "6080": {
+      "label": "Desktop (noVNC)",
+      "onAutoForward": "openBrowser"
+    },
+    "5901": {
+      "label": "VNC (use native client for best performance)"
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "postStartCommand": "bash .devcontainer/post-start.sh",
+  "remoteEnv": {
+    "DISPLAY": ":1",
+    "ROS_DISTRO": "humble",
+    "ROS_DOMAIN_ID": "30",
+    "TURTLEBOT3_MODEL": "burger",
+    "RMW_IMPLEMENTATION": "rmw_cyclonedds_cpp",
+    "QT_QPA_PLATFORM": "xcb"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/desktop-lite:1": {
+      "password": "ros",
+      "webPort": "6080",
+      "vncPort": "5901"
+    }
+  }
+}
