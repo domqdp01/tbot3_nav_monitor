@@ -26,6 +26,7 @@ setup(
         'console_scripts': [
             'velocity_publisher = demo_node.velocity_publisher:main',
             'odometry_subscriber = demo_node.odometry_subscriber:main',
+            'nav_goal_sender = demo_node.nav_goal_sender:main'
         ],
     },
 )
