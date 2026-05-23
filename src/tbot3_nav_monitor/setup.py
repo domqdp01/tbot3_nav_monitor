@@ -1,0 +1,39 @@
+from setuptools import find_packages, setup
+from glob import glob
+import os
+
+package_name = 'tbot3_nav_monitor'
+
+setup(
+    name=package_name,
+    version='0.0.0',
+    packages=find_packages(exclude=['test']),
+    data_files=[
+        ('share/ament_index/resource_index/packages',
+            ['resource/' + package_name]),
+        ('share/' + package_name, ['package.xml']),
+        ('share/' + package_name + '/config', glob('config/*')),
+        (
+            os.path.join('share', package_name, 'launch'),
+            glob('launch/*.launch.py')
+        ),
+    ],
+    install_requires=['setuptools'],
+    zip_safe=True,
+    maintainer='root',
+    maintainer_email='domenico.quartodipalo@mail.polimi.com',
+    description='TODO: Package description',
+    license='TODO: License declaration',
+    extras_require={
+        'test': [
+            'pytest',
+        ],
+    },
+    entry_points={
+        'console_scripts': [
+            'monitor_node =tbot3_nav_monitor.monitor_node:main',
+             'adaptive_planner_node = tbot3_nav_monitor.adaptive_planner_node:main',
+             'dynamic_planning_selector_node = tbot3_nav_monitor.dynamic_planning_selector_node:main'
+        ],
+    },
+)

@@ -1,0 +1,12 @@
+<!-- navigate_w_planner_selector.xml -->
+<root main_tree_to_execute="MainTree">
+  <BehaviorTree ID="MainTree">
+    <PipelineSequence name="NavigateWithReplanning">
+      <PlannerSelector selected_planner="{planner_id}" default_planner="GridBased" topic_name="planner_selector"/>
+      <RateController hz="1.0">
+        <ComputePathToPose goal="{goal}" path="{path}" planner_id="{planner_id}" error_code_id="{compute_path_error_code}"/>
+      </RateController>
+      <FollowPath path="{path}" controller_id="FollowPath" error_code_id="{follow_path_error_code}"/>
+    </PipelineSequence>
+  </BehaviorTree>
+</root>
