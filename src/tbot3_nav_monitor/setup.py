@@ -31,9 +31,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'monitor_node =tbot3_nav_monitor.monitor_node:main',
-             'adaptive_planner_node = tbot3_nav_monitor.adaptive_planner_node:main',
-             'dynamic_planning_selector_node = tbot3_nav_monitor.dynamic_planning_selector_node:main'
+             'adaptive_behavior_node = tbot3_nav_monitor.adaptive_behavior_node:main',
         ],
     },
 )

@@ -1,12 +1,34 @@
-<!-- navigate_w_planner_selector.xml -->
 <root main_tree_to_execute="MainTree">
   <BehaviorTree ID="MainTree">
-    <PipelineSequence name="NavigateWithReplanning">
-      <PlannerSelector selected_planner="{planner_id}" default_planner="GridBased" topic_name="planner_selector"/>
-      <RateController hz="1.0">
-        <ComputePathToPose goal="{goal}" path="{path}" planner_id="{planner_id}" error_code_id="{compute_path_error_code}"/>
-      </RateController>
-      <FollowPath path="{path}" controller_id="FollowPath" error_code_id="{follow_path_error_code}"/>
-    </PipelineSequence>
+
+    <RecoveryNode number_of_retries="6" name="NavigateRecovery">
+
+      <PipelineSequence name="NavigateWithReplanning">
+        <PlannerSelector selected_planner="{planner_id}" default_planner="ThetaStar" topic_name="planner_selector"/>
+        <ControllerSelector selected_controller="{controller_id}" default_controller="FollowPath" topic_name="controller_selector"/>
+        <RateController hz="1.0">
+          <RecoveryNode number_of_retries="1" name="ComputePathRecovery">
+            <ComputePathToPose goal="{goal}" path="{path}" planner_id="{planner_id}"/>
+            <ClearEntireCostmap name="ClearGlobalCostmap-Context" service_name="global_costmap/clear_entirely_global_costmap"/>
+          </RecoveryNode>
+        </RateController>
+        <RecoveryNode number_of_retries="1" name="FollowPathRecovery">
+          <FollowPath path="{path}" controller_id="{controller_id}"/>
+          <ClearEntireCostmap name="ClearLocalCostmap-Context" service_name="local_costmap/clear_entirely_local_costmap"/>
+        </RecoveryNode>
+      </PipelineSequence>
+
+      <RoundRobin name="RecoveryActions">
+        <Sequence name="ClearingActions">
+          <ClearEntireCostmap name="ClearLocalCostmap-Subtree" service_name="local_costmap/clear_entirely_local_costmap"/>
+          <ClearEntireCostmap name="ClearGlobalCostmap-Subtree" service_name="global_costmap/clear_entirely_global_costmap"/>
+        </Sequence>
+        <Spin spin_dist="1.57"/>
+        <Wait wait_duration="5.0"/>
+        <BackUp backup_dist="0.30" backup_speed="0.05"/>
+      </RoundRobin>
+
+    </RecoveryNode>
+
   </BehaviorTree>
 </root>
