@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 from nav2_msgs.action._navigate_to_pose import NavigateToPose_FeedbackMessage
 from std_msgs.msg import Int32
+from action_msgs.msg import GoalStatusArray
 
 
 class RecoveryMonitorNode(Node):
@@ -23,6 +24,13 @@ class RecoveryMonitorNode(Node):
             10
         )
 
+        self.status_sub = self.create_subscription(
+            GoalStatusArray,
+            '/navigate_to_pose/_action/status',
+            self.status_callback,
+            10
+        )
+
         self.get_logger().info('Recovery monitor node started')
     
     def feedback_callback(self, msg):
@@ -40,6 +48,21 @@ class RecoveryMonitorNode(Node):
             self.get_logger().warn(
                 f"[RECOVERY] Total: {self.total_recoveries}"
             )
+    
+    def status_callback(self, msg):
+
+        for status in msg.status_list:
+
+            if status.status == 4:  # SUCCEEDED
+
+                self.get_logger().warn('[RECOVERY MONITOR] Goal reached → reset recoveries')
+
+                self.total_recoveries = 0
+
+                recovery_msg = Int32()
+                recovery_msg.data = 0
+
+                self.recovery_pub.publish(recovery_msg)
 
 def main(args=None):
     rclpy.init(args=args)
