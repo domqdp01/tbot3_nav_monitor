@@ -31,6 +31,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+             'recovery_monitor_node = tbot3_nav_monitor.recovery_monitor_node:main',
              'adaptive_behavior_node = tbot3_nav_monitor.adaptive_behavior_node:main',
         ],
     },

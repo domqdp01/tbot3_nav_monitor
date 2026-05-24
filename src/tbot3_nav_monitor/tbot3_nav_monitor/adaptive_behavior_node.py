@@ -1,39 +1,83 @@
-#!/usr/bin/env python3
- 
 import rclpy
 from rclpy.node import Node
-from nav2_msgs.msg import BehaviorTreeLog
 
-RECOVERY_NODES = {'Spin', 'BackUp', 'Wait', 'ClearEntireCostmap',
-                  'ClearLocalCostmap-Context', 'ClearGlobalCostmap-Context',
-                  'ClearLocalCostmap-Subtree', 'ClearGlobalCostmap-Subtree'}
+from std_msgs.msg import Int32
+from std_msgs.msg import String
+from rclpy.qos import QoSProfile, DurabilityPolicy
+
 
 class AdaptiveBehaviorNode(Node):
     def __init__(self):
         super().__init__('adaptive_behavior_node')
 
-        # Parameters to count recoveries
-        self.count = 0
+        self.current_planner = "ThetaStar"
+
+        # Subscriber recoveries
+        self.recovery_sub = self.create_subscription(
+            Int32,
+            '/adaptive_nav/recovery_count',
+            self.recovery_callback,
+            10
+        )
+
+        qos = QoSProfile(
+            depth=1,
+            durability=DurabilityPolicy.TRANSIENT_LOCAL
+        )
+
+        self.planner_pub = self.create_publisher(
+            String,
+            '/planner_selector',
+            qos
+        )
+
+        self.get_logger().info('Adaptive Behavior Node Started')
+
+        self.publish_planner("ThetaStar")
+
+    def recovery_callback(self, msg):
+        recoveries = msg.data
+
+        # Planner Selector Policy
+        if recoveries < 2:
+            desired_planner = "ThetaStar"
+
+        elif recoveries < 4:
+            desired_planner = "GridBased"
         
-        # Subscribers
-        self.create_subscription(BehaviorTreeLog, '/behavior_tree_log', self.cb, 10)
-        self.get_logger().info('Recovery counter started')
+        else:
+            desired_planner = "GridBasedAStar"
 
-    def cb(self, msg):
-        for event in msg.event_log:
-            if (event.node_name in RECOVERY_NODES and event.current_status == 'RUNNING'):
-                self.count += 1
-                self.get_logger().info(f"[RECOVERY #{self.count}: {event.node_name}]")
+        # Publish at changes
 
-def main():
-    rclpy.init()
+        if desired_planner != self.current_planner:
+            
+            self.current_planner = desired_planner
+            
+            self.publish_planner(desired_planner)
+
+            self.get_logger().warn(
+                f'[ADAPTIVE] Switching planner to: {desired_planner}'
+            )
+
+    def publish_planner(self, planner_name):
+
+        msg = String()
+        msg.data = planner_name
+        self.planner_pub.publish(msg)
+
+def main(args=None):
+
+    rclpy.init(args=args)
+
     node = AdaptiveBehaviorNode()
-    try:
-        rclpy.spin(node)
-    except KeyboardInterrupt:
-        print("Shutting down the node... Bye!")
-    
+
+    rclpy.spin(node)
+
+    node.destroy_node()
+
     rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()
