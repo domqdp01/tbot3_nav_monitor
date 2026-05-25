@@ -20,9 +20,9 @@ def generate_launch_description():
         Node(
             package='tbot3_nav_monitor',
             executable='recovery_monitor_node',
-            name= 'recovery_monitor_node',
+            name='recovery_monitor_node',
             output='screen',
-            parameters= [{
+            parameters=[{
                 'use_sim_time': use_sim_time
             }]
         ),
@@ -32,6 +32,17 @@ def generate_launch_description():
             package='tbot3_nav_monitor',
             executable='adaptive_behavior_node',
             name='adaptive_behavior_node',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time
+            }]
+        ),
+
+        # Velocity Adapter Node
+        Node(
+            package='tbot3_nav_monitor',
+            executable='velocity_adapter_node',
+            name='velocity_adapter_node',
             output='screen',
             parameters=[{
                 'use_sim_time': use_sim_time

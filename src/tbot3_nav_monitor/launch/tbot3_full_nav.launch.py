@@ -19,7 +19,6 @@ def generate_launch_description():
 
     map_file = "/workspace/tbot3_nav_monitor/maps/house_map.yaml"
 
-    # ✅ Punta al tuo burger.yaml modificato, non a quello del pacchetto
     nav2_param_file = "/workspace/tbot3_nav_monitor/src/tbot3_nav_monitor/config/burger.yaml"
 
     use_sim_time_arg = DeclareLaunchArgument(
@@ -50,7 +49,7 @@ def generate_launch_description():
         launch_arguments={
             "use_sim_time": use_sim_time,
             "map":          map_path,
-            "params_file":  nav2_param_file,  # ✅ ora usa il tuo file
+            "params_file":  nav2_param_file, 
         }.items(),
     )
 
