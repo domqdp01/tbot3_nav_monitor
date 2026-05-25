@@ -34,6 +34,9 @@ setup(
              'recovery_monitor_node = tbot3_nav_monitor.recovery_monitor_node:main',
              'adaptive_behavior_node = tbot3_nav_monitor.adaptive_behavior_node:main',
              'velocity_adapter_node = tbot3_nav_monitor.velocity_adapter_node:main',
+             'goal_tolerance_adapter_node = tbot3_nav_monitor.goal_tolerance_adapter_node:main',
+             'real_time_monitor_node = tbot3_nav_monitor.real_time_monitor_node:main',
+             'fake_battery_node = tbot3_nav_monitor.fake_battery_node:main',
         ],
     },
 )

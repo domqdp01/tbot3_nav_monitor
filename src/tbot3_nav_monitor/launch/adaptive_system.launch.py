@@ -49,4 +49,26 @@ def generate_launch_description():
             }]
         ),
 
+        # Goal Tolerance Adapter Node
+        Node(
+            package='tbot3_nav_monitor',
+            executable='goal_tolerance_adapter_node',
+            name='goal_tolerance_adapter_node',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time
+            }]
+        ),
+
+        Node(
+            package='tbot3_nav_monitor',
+            executable='fake_battery_node',
+            name='fake_battery_node',
+            output='screen',
+            parameters=[{
+                'use_sim_time': use_sim_time
+            }]
+        )
+
+
     ])
