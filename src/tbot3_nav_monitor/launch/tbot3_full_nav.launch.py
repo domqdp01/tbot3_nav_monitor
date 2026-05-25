@@ -25,16 +25,24 @@ def generate_launch_description():
     use_sim_time_arg = DeclareLaunchArgument(
         "use_sim_time",
         default_value="true",
-        description="Usa il tempo di simulazione",
+        description="Use simulation time",
     )
     map_arg = DeclareLaunchArgument(
         "map",
         default_value=map_file,
-        description="Percorso del file yaml della mappa",
+        description="YAML path",
     )
+
+    world_name_arg = DeclareLaunchArgument(
+    "world_name",
+    default_value="house",
+    description="Gazebo's world name"
+    )
+
 
     use_sim_time = LaunchConfiguration("use_sim_time")
     map_path     = LaunchConfiguration("map")
+    world_name = LaunchConfiguration("world_name")
 
     gazebo_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -56,9 +64,22 @@ def generate_launch_description():
 
     nav2_delayed = TimerAction(period=5.0, actions=[nav2_launch])
 
+    csv_logger_node = Node(
+    package='tbot3_nav_monitor',
+    executable='csv_logger_node',
+    name='csv_logger_node',
+    output='screen',
+    parameters=[{
+        'use_sim_time': use_sim_time,
+        'world_name': world_name,
+    }]
+)
+
     return LaunchDescription([
         use_sim_time_arg,
         map_arg,
+        world_name_arg,
         gazebo_launch,
         nav2_delayed,
+        csv_logger_node,
     ])

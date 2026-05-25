@@ -37,6 +37,7 @@ setup(
              'goal_tolerance_adapter_node = tbot3_nav_monitor.goal_tolerance_adapter_node:main',
              'real_time_monitor_node = tbot3_nav_monitor.real_time_monitor_node:main',
              'fake_battery_node = tbot3_nav_monitor.fake_battery_node:main',
+             'csv_logger_node = tbot3_nav_monitor.csv_logger_node:main'
         ],
     },
 )
