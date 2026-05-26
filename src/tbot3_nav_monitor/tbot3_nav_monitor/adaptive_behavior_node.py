@@ -104,10 +104,10 @@ class AdaptiveBehaviorNode(Node):
         self.set_costmap_param(self.local_param_client, 'inflation_layer.cost_scaling_factor', cfg['local_scaling'])
 
         self.get_logger().warn(
-            f'[ADAPTIVE] Level {level} | '
-            f'Planner={cfg["planner"]} | '
-            f'G_infl={cfg["global_inflation"]} G_scale={cfg["global_scaling"]} | '
-            f'L_infl={cfg["local_inflation"]} L_scale={cfg["local_scaling"]}'
+            f'[ADAPTIVE] Level {level} | \n'
+            f'Planner={cfg["planner"]} | \n'
+            f'G_infl={cfg["global_inflation"]} G_scale={cfg["global_scaling"]} | \n'
+            f'L_infl={cfg["local_inflation"]} L_scale={cfg["local_scaling"]}\n'
         )
 
     def publish_planner(self, planner_name):

@@ -3,8 +3,14 @@ from rclpy.node import Node
 from geometry_msgs.msg import Twist
 
 from nav2_msgs.action import NavigateToPose
-# from nav2_msgs.action.navigate_to_pose import NavigateToPose_FeedbackMessage
-from std_msgs.msg import Float32
+from std_msgs.msg import Float32, Int32
+
+
+LEVEL_LABELS = {
+    1: "NOMINAL",
+    2: "DEGRADED",
+    3: "CRITICAL",
+}
 
 
 class RealTimeMonitorNode(Node):
@@ -17,10 +23,9 @@ class RealTimeMonitorNode(Node):
         self.eps = 0.05
         self.goal_eps = 0.25
         self.last_eta = 0.0
-
+        self.recovery_level = 1
 
         # ---------------- VEL SUBSCRIPTION ----------------
-
         self.create_subscription(
             Twist,
             '/cmd_vel',
@@ -46,20 +51,24 @@ class RealTimeMonitorNode(Node):
             10
         )
 
+        # ---------------- RECOVERY LEVEL ----------------
+        self.create_subscription(
+            Int32,
+            '/adaptive_nav/recovery_level',
+            self.recovery_level_cb,
+            10
+        )
+
         self.get_logger().info("Real Time Monitor Node started")
 
     def cmd_vel_callback(self, msg):
         self.current_vx = msg.linear.x
 
-
-
-    # =========================================================
-    # BATTERY CALLBACK
-    # =========================================================
-
     def battery_cb(self, msg: Float32):
-
         self.battery = msg.data
+
+    def recovery_level_cb(self, msg: Int32):
+        self.recovery_level = msg.data
 
     # =========================================================
     # NAV2 CALLBACK
@@ -79,29 +88,33 @@ class RealTimeMonitorNode(Node):
             eta = self.last_eta
         elif is_close:
             eta = 0.0
-            
         else:
             if vx > self.eps:
                 eta = dist / vx
             else:
                 eta = self.last_eta
-        
+
         if eta is None or not isinstance(eta, (int, float)):
             eta = self.last_eta
 
         self.last_eta = eta
 
+        level = self.recovery_level
+        label = LEVEL_LABELS.get(level, "UNKNOWN")
+
         log_msg = (
             "\n==============================\n"
             f"ETA: {self.last_eta:.2f} s\n"
             f"Distance remaining: {fb.distance_remaining:.2f} m\n"
-            f"Navigation time: {fb.navigation_time.sec}.{fb.navigation_time.nanosec:09d} s\n"
+            f"Navigation time: {fb.navigation_time.sec + fb.navigation_time.nanosec / 1e9:.2f} s\n"
             f"Recoveries: {fb.number_of_recoveries}\n"
+            f"Recovery level: {level} ({label})\n"
             f"Pose: x={fb.current_pose.pose.position.x:.2f}, y={fb.current_pose.pose.position.y:.2f}\n"
             f"Battery: {self.battery:.2f} %\n"
             "==============================\n"
         )
         self.get_logger().info(log_msg, throttle_duration_sec=0.5)
+
 
 # =========================================================
 # MAIN

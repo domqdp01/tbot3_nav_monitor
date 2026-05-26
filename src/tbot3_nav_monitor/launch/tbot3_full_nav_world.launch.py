@@ -18,7 +18,7 @@ def generate_launch_description():
     tb3_gazebo_dir = get_package_share_directory("turtlebot3_gazebo")
     tb3_nav2_dir   = get_package_share_directory("turtlebot3_navigation2")
 
-    map_file = "/workspace/tbot3_nav_monitor/maps/house_map.yaml"
+    map_file = "/workspace/tbot3_nav_monitor/maps/world_map.yaml"
 
     nav2_param_file = "/workspace/tbot3_nav_monitor/src/tbot3_nav_monitor/config/burger.yaml"
 
@@ -46,7 +46,7 @@ def generate_launch_description():
 
     gazebo_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(tb3_gazebo_dir, "launch", "turtlebot3_house.launch.py")
+            os.path.join(tb3_gazebo_dir, "launch", "turtlebot3_world.launch.py")
         ),
         launch_arguments={"use_sim_time": use_sim_time}.items(),
     )
