@@ -38,6 +38,10 @@ class AdaptiveBehaviorNode(Node):
 
         self.current_level = -1
 
+        # -------------------------
+        # PUBLISHERS
+        # -------------------------
+
         self.level_sub = self.create_subscription(
             Int32,
             '/adaptive_nav/recovery_level',
@@ -65,6 +69,8 @@ class AdaptiveBehaviorNode(Node):
             SetParameters,
             '/local_costmap/local_costmap/set_parameters'
         )
+
+        # Waiting services to be ready
 
         while not self.param_client.wait_for_service(timeout_sec=1.0):
             self.get_logger().warn('Waiting for global costmap set_parameters service...')

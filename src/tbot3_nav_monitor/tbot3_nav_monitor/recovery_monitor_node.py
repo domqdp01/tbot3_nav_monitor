@@ -12,6 +12,10 @@ class RecoveryMonitorNode(Node):
         self.total_recoveries = 0
         self.current_level = -1
 
+        # -------------------------
+        # SUBSCRIBERS
+        # -------------------------
+
         self.feedback_sub = self.create_subscription(
             NavigateToPose_FeedbackMessage,
             '/navigate_to_pose/_action/feedback',
@@ -19,16 +23,20 @@ class RecoveryMonitorNode(Node):
             10
         )
 
-        self.level_pub = self.create_publisher(
-            Int32,
-            '/adaptive_nav/recovery_level',
-            10
-        )
-
         self.status_sub = self.create_subscription(
             GoalStatusArray,
             '/navigate_to_pose/_action/status',
             self.status_callback,
+            10
+        )
+
+        # -------------------------
+        # PUBLISHERS
+        # -------------------------
+
+        self.level_pub = self.create_publisher(
+            Int32,
+            '/adaptive_nav/recovery_level',
             10
         )
 

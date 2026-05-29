@@ -5,7 +5,7 @@ from rcl_interfaces.srv import SetParameters
 from rcl_interfaces.msg import Parameter, ParameterValue, ParameterType
 
 
-# Base velocities (100%) from DWB config
+# Base velocities (100%) from tbot3 Burger config
 BASE_VEL_X     = 0.22
 BASE_VEL_THETA = 1.0
 
@@ -62,10 +62,8 @@ class VelocityAdapterNode(Node):
         vel_x     = round(BASE_VEL_X     * scale, 4)
         vel_theta = round(BASE_VEL_THETA * scale, 4)
 
-        # DWB uses FollowPath.max_vel_x and FollowPath.max_vel_theta
-        # max_speed_xy == match max_vel_x
         self.set_param('FollowPath.max_vel_x',     vel_x)
-        self.set_param('FollowPath.max_speed_xy',  vel_x)
+        self.set_param('FollowPath.max_speed_xy',  vel_x) # max_speed_xy ==  max_vel_x
         self.set_param('FollowPath.max_vel_theta',  vel_theta)
 
         self.get_logger().warn(

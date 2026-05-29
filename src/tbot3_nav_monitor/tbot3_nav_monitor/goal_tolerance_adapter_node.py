@@ -14,7 +14,7 @@ from rcl_interfaces.msg import (
 LEVELS = {
     1: {'xy_tol': 0.25, 'yaw_tol': 0.25},
     2: {'xy_tol': 0.45, 'yaw_tol': 0.35},
-    3: {'xy_tol': 0.70, 'yaw_tol': 0.50},
+    3: {'xy_tol': 0.80, 'yaw_tol': 0.60},
 }
 
 
@@ -26,12 +26,20 @@ class GoalToleranceAdapterNode(Node):
 
         self.current_level = -1
 
+        # -------------------------
+        # SUBSCRIBER
+        # -------------------------
+
         self.level_sub = self.create_subscription(
             Int32,
             '/adaptive_nav/recovery_level',
             self.level_callback,
             10
         )
+
+        # -------------------------
+        # SERVER/CLIENT
+        # -------------------------
 
         self.param_client = self.create_client(
             SetParameters,

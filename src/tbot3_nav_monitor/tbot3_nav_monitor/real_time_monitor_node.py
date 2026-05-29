@@ -70,9 +70,9 @@ class RealTimeMonitorNode(Node):
     def recovery_level_cb(self, msg: Int32):
         self.recovery_level = msg.data
 
-    # =========================================================
+    # ----------------------------------
     # NAV2 CALLBACK
-    # =========================================================
+    # ----------------------------------
 
     def cb(self, msg):
 
@@ -109,16 +109,15 @@ class RealTimeMonitorNode(Node):
             f"Navigation time: {fb.navigation_time.sec + fb.navigation_time.nanosec / 1e9:.2f} s\n"
             f"Recoveries: {fb.number_of_recoveries}\n"
             f"Recovery level: {level} ({label})\n"
-            f"Pose: x={fb.current_pose.pose.position.x:.2f}, y={fb.current_pose.pose.position.y:.2f}\n"
             f"Battery: {self.battery:.2f} %\n"
             "==============================\n"
         )
         self.get_logger().info(log_msg, throttle_duration_sec=0.5)
 
 
-# =========================================================
+# ----------------------------------
 # MAIN
-# =========================================================
+# ----------------------------------
 
 def main():
     rclpy.init()

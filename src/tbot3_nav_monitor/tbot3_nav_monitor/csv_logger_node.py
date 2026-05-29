@@ -39,7 +39,7 @@ class CSVLoggerNode(Node):
 
         csv_dir = "/workspace/tbot3_nav_monitor/CSV_files"
 
-        # create folder if it does not exist
+        # Create folder if it does not exist
         os.makedirs(csv_dir, exist_ok=True)
 
         self.file_path = os.path.join(csv_dir, file_name)
@@ -69,37 +69,37 @@ class CSVLoggerNode(Node):
         self.create_subscription(
             NavigateToPose.Impl.FeedbackMessage,
             '/navigate_to_pose/_action/feedback',
-            self.nav_cb,
+            self.nav_callback,
             10
         )
 
         self.create_subscription(
             Twist,
             '/cmd_vel',
-            self.cmd_vel_cb,
+            self.cmd_vel_callback,
             10
         )
 
         self.create_subscription(
             Float32,
             '/battery_state',
-            self.battery_cb,
+            self.battery_callback,
             10
         )
 
         self.get_logger().info(f"CSV Logger started -> {self.file_path}")
 
-    # =========================================================
+    # -------------------------
     # CMD VEL
-    # =========================================================
+    # -------------------------
 
-    def cmd_vel_cb(self, msg: Twist):
+    def cmd_vel_callback(self, msg: Twist):
         self.vx = msg.linear.x
         self.vz = msg.angular.z
 
-    # =========================================================
+    # -------------------------
     # TF ROBOT POSE
-    # =========================================================
+    # -------------------------
 
     def get_pose(self):
 
@@ -118,18 +118,18 @@ class CSVLoggerNode(Node):
         except Exception:
             return None
 
-    # =========================================================
+    # -------------------------
     # BATTERY
-    # =========================================================
+    # -------------------------
     #     
-    def battery_cb(self, msg: Float32):
+    def battery_callback(self, msg: Float32):
         self.battery = msg.data
 
-    # =========================================================
+    # -------------------------
     # NAV2 FEEDBACK
-    # =========================================================
+    # -------------------------
 
-    def nav_cb(self, msg):
+    def nav_callback(self, msg):
 
         fb = msg.feedback
 
@@ -160,9 +160,9 @@ class CSVLoggerNode(Node):
         self.writer.writerow(row)
         self.csv_file.flush()
 
-    # =========================================================
+    # -------------------------
     # CLEAN EXIT
-    # =========================================================
+    # -------------------------
 
     def destroy_node(self):
         self.csv_file.close()

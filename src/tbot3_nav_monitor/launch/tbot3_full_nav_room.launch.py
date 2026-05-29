@@ -21,7 +21,7 @@ def generate_launch_description():
     pkg_gazebo_ros = get_package_share_directory("gazebo_ros")
 
     # =========================
-    # YOUR CUSTOM WORLD PATH
+    # CUSTOM WORLD PATH
     # =========================
     world_file      = "/workspace/tbot3_nav_monitor/world/room.world"
     map_file        = "/workspace/tbot3_nav_monitor/maps/room_map.yaml"
@@ -39,7 +39,7 @@ def generate_launch_description():
         description="YAML map path",
     )
     world_name_arg = DeclareLaunchArgument(
-        "world_name", default_value="custom_world",
+        "world_name", default_value="room_world",
         description="Gazebo world name",
     )
 
@@ -48,7 +48,7 @@ def generate_launch_description():
     world_name   = LaunchConfiguration("world_name")
 
     # -------------------------
-    # GAZEBO — gzserver con il tuo world
+    # GAZEBO
     # -------------------------
     gzserver = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -64,7 +64,7 @@ def generate_launch_description():
     )
 
     # -------------------------
-    # ROBOT STATE PUBLISHER (pubblica i TF)
+    # ROBOT STATE PUBLISHER
     # -------------------------
     robot_state_publisher = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -84,7 +84,7 @@ def generate_launch_description():
     )
 
     # -------------------------
-    # NAV2 (delayed di 5s per dare tempo a Gazebo)
+    # NAV2 
     # -------------------------
     nav2_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -96,7 +96,7 @@ def generate_launch_description():
             "params_file":  nav2_param_file,
         }.items(),
     )
-    nav2_delayed = TimerAction(period=5.0, actions=[nav2_launch])
+    nav2_delayed = TimerAction(period=10.0, actions=[nav2_launch])
 
     # -------------------------
     # CSV LOGGER NODE

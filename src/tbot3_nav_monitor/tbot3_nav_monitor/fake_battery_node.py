@@ -93,9 +93,6 @@ class FakeBatteryNode(Node):
         msg.data = self.battery
         self.battery_pub.publish(msg)
 
-        # self.get_logger().info(
-        #     f"Battery: {self.battery:.2f}%"
-        # )
 
 
 def main():
