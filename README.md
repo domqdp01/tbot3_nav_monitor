@@ -1,6 +1,6 @@
 # tbot3_nav_monitor
 
-A ROS 2 (Humble) package for **adaptive navigation monitoring** of a TurtleBot3 Burger in Gazebo simulation. The system observes Nav2 recovery events in real time and automatically tunes planner, costmap inflation, velocity limits, and goal tolerances — logging all navigation metrics to CSV for post-run analysis.
+A ROS 2 (Humble) package for **adaptive navigation monitoring** of a TurtleBot3 Burger in Gazebo simulation. The system observes Nav2 recovery events in real time and automatically tunes planner, costmap inflation, velocity limits, and goal tolerances. Finally it logs all navigation metrics to CSV for post-run analysis.
 
 ---
 
@@ -60,10 +60,10 @@ Standard Nav2 configurations are static: they work well in open spaces but strug
 
 ### Design choices
 
-- **Dynamic parameter calls over restarts** — adapters use `AsyncParameterClient` to change Nav2 parameters at runtime with zero downtime.
-- **Transient-local QoS on `/planner_selector`** — late-joining subscribers (e.g. after Nav2 restarts) still receive the last published planner choice.
-- **Separation of concerns** — each adapter is an independent node, making it easy to add new adaptation dimensions (e.g. replanning frequency) without touching existing nodes.
-- **CSV logging as a first-class feature** — every run produces a timestamped file, enabling post-run analysis without needing to replay bags.
+- **Dynamic parameter calls over restarts**: adapters use `AsyncParameterClient` to change Nav2 parameters at runtime with zero downtime.
+- **Transient-local QoS on `/planner_selector`**: late-joining subscribers (e.g. after Nav2 restarts) still receive the last published planner choice.
+- **Separation of concerns**: each adapter is an independent node, making it easy to add new adaptation dimensions (e.g. replanning frequency) without touching existing nodes.
+- **CSV logging as a first-class feature**: every run produces a timestamped file, enabling post-run analysis without needing to replay bags.
 
 ---
 
@@ -75,10 +75,13 @@ tbot3_nav_monitor/
 │   ├── burger.yaml                        # Nav2 parameters 
 │   └── navigate_w_planner_selector.xml    # BehaviorTree with planner selector
 ├── launch/
-│   ├── tbot3_full_nav.launch.py           # Full stack: Gazebo + Nav2 + CSV logger
+│   ├── tbot3_full_nav_house.launch.py           # Full stack: Gazebo + Nav2 + CSV logger for tbot3_house world
+│   ├── tbot3_full_nav_room.launch.py            # Full stack: Gazebo + Nav2 + CSV logger for custom world
+│   ├── tbot3_full_nav_world.launch.py           # Full stack: Gazebo + Nav2 + CSV logger for tbot3_world
 │   └── adaptive_system.launch.py         # Adaptive nodes only
 ├── maps/
 │   ├── house_map.yaml / house_map.pgm     # House world map
+│   ├── room_map.yaml / room_map.pgm     # Custom world map
 │   └── world_map.yaml / world_map.pgm    # TurtleBot3 world map
 ├── tbot3_nav_monitor/
 │   ├── recovery_monitor_node.py
@@ -269,23 +272,7 @@ Open your browser at **http://localhost:6080** (password: `ros`).
 ### Full stack (Gazebo + Nav2 + CSV logger)
 
 ```bash
-ros2 launch tbot3_nav_monitor tbot3_full_nav.launch.py
-```
-
-Optional arguments:
-
-| Argument | Default | Description |
-|----------|---------|-------------|
-| `use_sim_time` | `true` | Use Gazebo clock |
-| `map` | `maps/house_map.yaml` | Path to the map file |
-| `world_name` | `house` | Label used in the CSV filename |
-
-Example with the TurtleBot3 world map:
-
-```bash
-ros2 launch tbot3_nav_monitor tbot3_full_nav.launch.py \
-  map:=/workspace/tbot3_nav_monitor/maps/world_map.yaml \
-  world_name:=world
+ros2 launch tbot3_nav_monitor tbot3_full_nav_<world>.launch.py
 ```
 
 ### Adaptive system only (if Nav2 is already running)
