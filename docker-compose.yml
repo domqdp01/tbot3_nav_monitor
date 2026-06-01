@@ -1,0 +1,12 @@
+services:
+  tbot3_nav_monitor:
+    image: domqdp01/tbot3_nav_monitor:latest
+    environment:
+      - TURTLEBOT3_MODEL=burger
+      - DISPLAY=:1
+    ports:
+      - "6080:6080"
+    volumes:
+      - ./CSV_files:/workspace/tbot3_nav_monitor/CSV_files
+    stdin_open: true
+    tty: true

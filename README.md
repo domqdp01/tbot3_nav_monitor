@@ -190,100 +190,77 @@ The file name includes the world name and a timestamp, e.g. `house_2025-05-25_23
 ---
 
 ## Setup & Installation
-
+ 
 > **Note on GPU / display:** Gazebo Classic requires a display server. On Windows with Docker Desktop (and on any system without GPU passthrough), X11 forwarding is not available. This package uses a **noVNC desktop** embedded in the container — access the full GUI from any browser at `http://localhost:6080`, no X11 or GPU required.
-
+ 
 ---
-
+ 
 ### Option A: Dev Container (VS Code)
-
+ 
 This is the recommended approach. The Dev Container automatically sets up the entire ROS 2 Humble + Gazebo environment.
-
+ 
 **Prerequisites**
-
+ 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows/macOS) or [Docker Engine](https://docs.docker.com/engine/install/) (Linux)
 - [VS Code](https://code.visualstudio.com/)
 - [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) for VS Code
-
 **Resource allocation (important for Windows)**
-
+ 
 Open Docker Desktop → Settings → Resources and set:
 - CPUs: 6–8 cores
 - Memory: 12–16 GB
-
 **Steps**
-
+ 
 1. Clone the repository and open it in VS Code:
-
 ```bash
-git clone https://github.com/YOUR_USERNAME/tbot3_nav_monitor.git
+git clone https://github.com/domqdp01/tbot3_nav_monitor.git
 cd tbot3_nav_monitor
 code .
 ```
-
+ 
 2. VS Code will detect `.devcontainer/` and show a popup — click **"Reopen in Container"**.  
    Alternatively: `F1` → *Dev Containers: Reopen in Container*.
-
 3. First build takes **10–15 minutes** (downloads ROS 2, Gazebo, TurtleBot3 packages). Subsequent opens take ~30 seconds.
-
 4. Once inside the container, open your browser and go to **http://localhost:6080** (password: `ros`) to access the Gazebo GUI.
-
 5. In the VS Code terminal, proceed to [Build](#build) and [Usage](#usage).
-
 > **GPU note:** The devcontainer uses `--gpus all` for NVIDIA acceleration. If you don't have an NVIDIA GPU (e.g. Windows + AMD, or macOS), open `.devcontainer/devcontainer.json` and comment out the `"runArgs"` line before opening the container. Software rendering will be used automatically via noVNC.
-
+ 
 ---
-
+ 
 ### Option B: Docker Hub (direct pull)
-
+ 
 Use this option if you don't have VS Code or prefer a plain Docker workflow.
-
-**Pull the image**
-
+ 
+**Docker Hub image:** https://hub.docker.com/r/domqdp01/tbot3_nav_monitor
+ 
+**Option B1 — Docker Compose (recommended)**
+ 
 ```bash
-docker pull YOUR_DOCKERHUB_USERNAME/tbot3_nav_monitor:latest
+git clone https://github.com/domqdp01/tbot3_nav_monitor.git
+cd tbot3_nav_monitor
+docker compose up
 ```
-
-**Run the container**
-
+ 
+This mounts `CSV_files/` as a volume so logs persist on your host machine after the container stops.
+ 
+**Option B2 — Plain Docker run**
+ 
 ```bash
+docker pull domqdp01/tbot3_nav_monitor:latest
+ 
 docker run -it --rm \
   -p 6080:6080 \
   -e TURTLEBOT3_MODEL=burger \
   -e DISPLAY=:1 \
-  YOUR_DOCKERHUB_USERNAME/tbot3_nav_monitor:latest
+  domqdp01/tbot3_nav_monitor:latest
 ```
-
-> On Linux with NVIDIA GPU, add `--gpus all` to the command above for hardware acceleration.
-
+ 
+> On Linux with NVIDIA GPU, add `--gpus all` to either command above for hardware acceleration.
+ 
 **Access the GUI**
-
+ 
 Open your browser at **http://localhost:6080** (password: `ros`).
-
-**Push your own image (for contributors)**
-
-```bash
-# Build from the repo root
-docker build -t YOUR_DOCKERHUB_USERNAME/tbot3_nav_monitor:latest .
-
-# Push
-docker login
-docker push YOUR_DOCKERHUB_USERNAME/tbot3_nav_monitor:latest
-```
-
----
-
-## Build
-
-Inside the container (either Dev Container or Docker), run:
-
-```bash
-export TURTLEBOT3_MODEL=burger
-
-cd /workspace/tbot3_nav_monitor
-colcon build --symlink-install
-source install/setup.bash
-```
+ 
 
 ---
 
@@ -327,7 +304,34 @@ ros2 run tbot3_nav_monitor real_time_monitor_node
 
 ---
 
-## Multi-Environment Testing
+ 
+## Testing
+ 
+### Unit tests
+ 
+Core logic is tested with `pytest` — no ROS or Gazebo required. The test file lives at `src/tbot3_nav_monitor/test/test_core_logic.py` and covers all 5 nodes with **38 tests** total:
+ 
+| Test class | Node | Tests |
+|------------|------|-------|
+| `TestComputeLevel` | RecoveryMonitorNode | 7 |
+| `TestComputeVelocities` | VelocityAdapterNode | 5 |
+| `TestAdaptiveBehavior` | AdaptiveBehaviorNode | 7 |
+| `TestGoalTolerance` | GoalToleranceAdapterNode | 6 |
+| `TestFakeBattery` | FakeBatteryNode | 8 |
+| `TestEtaComputation` | RealTimeMonitorNode | 5 |
+ 
+**Run the tests:**
+ 
+```bash
+cd /workspace/tbot3_nav_monitor
+python3 -m pytest src/tbot3_nav_monitor/test/test_core_logic.py -v
+```
+ 
+Expected output:
+ 
+```
+38 passed in 0.57s
+```
 
 ### Test environment
 
@@ -341,17 +345,25 @@ ros2 run tbot3_nav_monitor real_time_monitor_node
 | GPU passthrough | ❌ Not available on Windows/AMD — software rendering |
 
 ### Results
-
+ 
 | Test | Status | Notes |
 |------|--------|-------|
 | Container build (Dev Container) | ✅ | ~12 min first build |
 | Gazebo Classic launch | ✅ | Via noVNC at `localhost:6080` |
-| Full Nav2 stack | ✅ | `tbot3_full_nav.launch.py` |
+| Full Nav2 stack | ✅ | `tbot3_full_nav_<world>.launch.py` |
 | Adaptive recovery levels 1→2→3 | ✅ | Triggered by dense obstacle placement |
 | Velocity scaling per level | ✅ | Confirmed via `/cmd_vel` topic echo |
 | CSV logging | ✅ | Files written to `CSV_files/` |
 | Real-time monitor node | ✅ | 2 Hz terminal panel |
 | Fake battery drain | ✅ | Drains linearly with distance |
+ 
+### Per-world results
+ 
+| World | Max recovery level reached | Adaptive response triggered | Notes |
+|-------|---------------------------|----------------------------|-------|
+| TurtleBot3 World | Level 1 (0 recoveries) | None — nominal navigation | Well-spaced obstacles; robot navigated without any recovery |
+| TurtleBot3 House | Level 2 (2 recoveries) | Velocity reduced to 75%, inflation tightened | Robot struggled passing through a doorway, triggering level 2 |
+| TurtleBot3 Room | Level 3 ( 4 recoveries) | Velocity reduced to 50%, planner switched to GridBasedAStar | Narrow passages caused repeated recoveries and triggered level 3 |
 
 ### Known limitations
 
@@ -366,14 +378,14 @@ The adaptive system behaved as designed across all tested scenarios. At recovery
 ---
 
 ## Demo Video
-
-> 🎬 **Coming soon** — a 5-minute walkthrough showing the full adaptive system in action (Gazebo launch → goal setting → recovery escalation → CSV output).
-
-<!-- Once recorded, replace this section with:
-[![Demo Video](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://youtu.be/YOUR_VIDEO_ID)
-or embed directly if uploading to GitHub:
-https://github.com/YOUR_USERNAME/tbot3_nav_monitor/assets/YOUR_VIDEO.mp4
--->
+ 
+Walkthrough showing the full adaptive system in action across all three environments: Gazebo launch → goal setting → recovery escalation.
+ 
+| World | Video |
+|-------|-------|
+| TurtleBot3 World | [world_simulation.mp4](https://github.com/domqdp01/tbot3_nav_monitor/releases/download/world_simulation/world_simulation.mp4) |
+| TurtleBot3 House | [house_simulation.mp4](https://github.com/domqdp01/tbot3_nav_monitor/releases/download/world_simulation/house_simulation.mp4) |
+| TurtleBot3 Room  | [room_simulation.mp4](https://github.com/domqdp01/tbot3_nav_monitor/releases/download/world_simulation/room_simulation.mp4) |
 
 ---
 
